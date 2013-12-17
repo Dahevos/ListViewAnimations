@@ -179,9 +179,7 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 			if (mAutoDeleteDelayMillis > 0) {
 				startAutoDeleteTimer();
 			}
-		} else {
-			performRemovalIfNecessary();
-		}
+		} 
 	}
 
 	private void startAutoDeleteTimer() {
@@ -219,7 +217,6 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 
 	@Override
 	public void onListScrolled() {
-		performRemovalIfNecessary();
 	}
 
 	private void performRemovalIfNecessary() {
