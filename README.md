@@ -1,3 +1,13 @@
+Modifications :
+* Change alpha animation of the swype effect in order to be less important
+* Add a constructor to build a ContextualUndoAdapter with a confirm button
+* Remove the removal confirmation when the user scroll on the list view
+
+Last update : 18/12/2013
+
+
+Original presentation :
+
 ListViewAnimations ([Play Store Demo][1])
 ===========
 
