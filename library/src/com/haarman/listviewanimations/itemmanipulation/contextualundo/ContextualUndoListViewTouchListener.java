@@ -242,7 +242,7 @@ public class ContextualUndoListViewTouchListener implements SwipeOnTouchListener
 
 			if (mSwiping) {
 				setTranslationX(mDownView, deltaX);
-				setAlpha(mDownView, Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX) / mViewWidth)));
+				setAlpha(mDownView, Math.max(0f, Math.min(1f, 1f - 2f * Math.abs(deltaX/2) / mViewWidth)));
 				return true;
 			}
 			break;
