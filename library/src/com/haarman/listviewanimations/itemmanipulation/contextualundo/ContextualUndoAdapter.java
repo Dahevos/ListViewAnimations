@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -57,6 +58,8 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 
 	private final int mUndoLayoutId;
 	private final int mUndoActionId;
+	private final int mConfirmActionId;
+
 	private final int mCountDownTextViewResId;
 	private final int mAutoDeleteDelayMillis;
 
@@ -87,9 +90,15 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	 *            The id of the component which undoes the dismissal
 	 */
 	public ContextualUndoAdapter(BaseAdapter baseAdapter, int undoLayoutId, int undoActionId) {
-		this(baseAdapter, undoLayoutId, undoActionId, -1, -1, null);
+		this(baseAdapter, undoLayoutId, undoActionId, -1, -1, -1, null);
 	}
 
+	
+	
+	public ContextualUndoAdapter(BaseAdapter baseAdapter, int undoLayoutId, int undoActionId, int confirmActionId) {
+		this(baseAdapter, undoLayoutId, undoActionId, confirmActionId, -1, -1, null);
+	}
+	
 	/**
 	 * Create a new ContextualUndoAdapter based on given parameters.
 	 * Will automatically remove the swiped item after autoDeleteTimeMillis milliseconds.
@@ -98,11 +107,11 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	 * @param undoLayoutResId The layout resource id to show as undo
 	 * @param undoActionResId The id of the component which undoes the dismissal
 	 * @param autoDeleteTimeMillis The time in milliseconds that the adapter will wait for he user to hit undo before automatically deleting the item
-	 */
+	 
 	public ContextualUndoAdapter(BaseAdapter baseAdapter, int undoLayoutResId, int undoActionResId, int autoDeleteTimeMillis) {
 		this(baseAdapter, undoLayoutResId, undoActionResId, autoDeleteTimeMillis, -1, null);
 	}
-
+*/
 	/**
 	 * Create a new ContextualUndoAdapter based on given parameters.
 	 * Will automatically remove the swiped item after autoDeleteTimeMillis milliseconds.
@@ -114,7 +123,7 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 	 * @param countDownTextViewResId The resource id of the {@link TextView} in the undoLayoutResId that will show the time left
 	 * @param countDownFormatter the {@link CountDownFormatter} which provides text to be shown in the {@link TextView} as specified by countDownTextViewResId
 	 */
-	public ContextualUndoAdapter(BaseAdapter baseAdapter, int undoLayoutResId, int undoActionResId, int autoDeleteTime, int countDownTextViewResId, CountDownFormatter countDownFormatter) {
+	public ContextualUndoAdapter(BaseAdapter baseAdapter, int undoLayoutResId, int undoActionResId, int confirmActionResId, int autoDeleteTime, int countDownTextViewResId, CountDownFormatter countDownFormatter) {
 		super(baseAdapter);
 
 		mHandler = new Handler();
@@ -122,18 +131,23 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 
 		mUndoLayoutId = undoLayoutResId;
 		mUndoActionId = undoActionResId;
+		mConfirmActionId = confirmActionResId; 
 		mCurrentRemovedId = -1;
 		mAutoDeleteDelayMillis = autoDeleteTime;
 		mCountDownTextViewResId = countDownTextViewResId;
 		mCountDownFormatter = countDownFormatter;
 	}
 
+	private int positionInProgress;
 	@Override
 	public final View getView(int position, View convertView, ViewGroup parent) {
+		this.positionInProgress = position;
 		ContextualUndoView contextualUndoView = (ContextualUndoView) convertView;
 		if (contextualUndoView == null) {
 			contextualUndoView = new ContextualUndoView(parent.getContext(), mUndoLayoutId, mCountDownTextViewResId);
 			contextualUndoView.findViewById(mUndoActionId).setOnClickListener(new UndoListener(contextualUndoView));
+			contextualUndoView.findViewById(mConfirmActionId).setOnClickListener(new ConfirmListener(position));
+
 		}
 
 		View contentView = super.getView(position, contextualUndoView.getContentView(), contextualUndoView);
@@ -180,6 +194,9 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 				startAutoDeleteTimer();
 			}
 		} 
+		/*else {
+			performRemovalIfNecessary();
+		}*/
 	}
 
 	private void startAutoDeleteTimer() {
@@ -217,6 +234,7 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 
 	@Override
 	public void onListScrolled() {
+		//performRemovalIfNecessary();
 	}
 
 	private void performRemovalIfNecessary() {
@@ -412,6 +430,22 @@ public class ContextualUndoAdapter extends BaseAdapterDecorator implements Conte
 		private void animateViewComingBack() {
 			animate(mContextualUndoView).translationX(0).setDuration(ANIMATION_DURATION).setListener(null);
 		}
+	}
+	
+	private class ConfirmListener implements View.OnClickListener {
+
+		private int position;
+
+		public ConfirmListener(int position ) {
+			this.position = position;
+		}
+
+		@Override
+		public void onClick(View v) {
+			performRemovalIfNecessary();
+		}
+
+
 	}
 
 	private class RecycleViewListener implements AbsListView.RecyclerListener {
